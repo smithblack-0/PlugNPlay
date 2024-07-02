@@ -1,0 +1,96 @@
+### Commands ####
+#
+# Commands are the thing the model can actually demand happen. In this
+# configuration file, we define these commands. These commands will
+# later be read by the protocol instances and turned into examples
+#
+# These commands list their metainfo, then give a query schema and a return schema.
+#
+# The query schema tells us how to invoke the command, the return schema what the response
+# will look like.
+
+### Modules ###
+#
+# Modules are the top level feature of a command collection. They should be
+# define in terms of
+# - a "module_name" indicating what to call it
+# - a "purpose" indicating what the module is for
+# - any number of attached commands.
+
+# They may have any number of attached commands
+
+###
+# Commands must be provided as a subclass on the module class that contains
+# - a "command_name" feature that tells us what to call it
+# - a "purpose" feature
+# - a "query_schema" subfeature containing the hierarchial information to be dispatched in a query. The
+#   query schema must contain a feature called "command" that indicates what the parse engine will dispatch to
+#   and may contain other features as well.
+# - a "response_schema" subfeature indicating how responses are expected to be returned.
+#
+# They will be loaded into and returned into a dictionary with the same features
+
+#### Base Commands ####
+
+[base_commands]
+module_name = "Base/Root commands"
+module_command = "BaseCommand"
+purpose = "This set of commands interacts with the core environment allowing you to discover modules and interact with them"
+
+
+[base_commands.DiscoverModules]
+command_name = "Discover Modules"
+purpose = "Produce a list of all available modules that the model can direct"
+
+    [base_commands.DiscoverModules.query_schema]
+    module = "BaseCommand"
+    command = "DiscoverModules"
+
+    [base_commands.DiscoverModules.response_schema]
+    response = "string of all detected modules, which will include the module name and its access id"
+
+[base_commands.DiscoverModulesVerbose]
+command_name = "DiscoverModulesVerbose"
+purpose = "Produce a list of all available modules, and information on what each module does"
+
+    [base_commands.DiscoverModulesVerbose.query_schema]
+    module = "BaseCommand"
+    command = "DiscoverModulesVerbose"
+
+    [base_commands.DiscoverModulesVerbose.response_schema]
+    response = "First a string of all modules, then information on how to use each module"
+
+[base_commands.ReadModuleManual]
+command_name = "Read Module Manual"
+purpose = "Reads the information on how to use a particular module"
+
+    [base_commands.ReadModuleManual.query_schema]
+    module = "BaseCommand"
+    command = "ReadModuleManual"
+    target_module = "Name of the target module"
+
+    [base_commands.ReadModuleManual.response_schema]
+    response = "A description of how to use the module."
+
+[base_commands.AccessModule]
+command_name = "Access module"
+purpose = "Interact with a module in some way"
+
+    [base_commands.AccessModule.query_schema]
+    module = "BaseCommand"
+    command = "AccessModule"
+    target_module = "Name of the target module"
+    content = "The content to send to the module"
+    extra_info = "Optional. You may provide extra hierarchical terms if you know they will be used."
+
+    [base_commands.AccessModule.response_schema]
+    response = "The response from the module"
+    target_module = "Name of the module"
+
+[base_commands.SelectProtocol]
+command_name = "Select protocol"
+purpose = "Select the protocol to use when passing hierarchial data"
+    [base_commands.SelectProtocol.query_schema]
+    module = "BaseCommand"
+    command = "SelectProtocol"
+    directive = "One of the available protocols"
