@@ -2,19 +2,19 @@ import textwrap
 from typing import Union, List, Dict, Any, Generator, Type, Optional, Tuple, Callable, Set
 import itertools
 from abc import ABC, abstractmethod
-from .exceptions import TransformException
+from .exceptions import TransformException, NodeException
+from dataclasses import dataclass
 
 ### Raw schema node definitions ####
-
-# Base SchemaNode class
-from typing import Union, List, Dict, Any, Generator, Type, Optional, Tuple, Callable, Set
-from abc import ABC, abstractmethod
-
-from typing import Union, List, Dict, Any, Generator, Type, Optional, Tuple, Callable, Set
-from abc import ABC, abstractmethod
-
-from typing import Union, List, Dict, Any, Generator, Type, Optional, Tuple, Callable, Set
-from abc import ABC, abstractmethod
+@dataclass
+class NodeFile:
+    """
+    Represents important information about a node.
+    """
+    name: str
+    pytype: Optional[Type]
+    transforms: Dict[str, Callable]
+    node_type: 'SchemaNode'
 
 class SchemaNode(ABC):
     """
@@ -34,23 +34,55 @@ class SchemaNode(ABC):
         default_transform(data: Any) -> Generator['SchemaNode', None, None]: Abstract method to apply the default transform.
         transform(transform_name: str, data: Any) -> Generator['SchemaNode', None, None]: Method to apply a registered transform.
     """
+    # Required fields for subclasses
+    _registry: List[NodeFile] = {}
 
-    _name: str
-    _pytype: Type
-    _transforms_list: Set[str] = set()
-    _transform_registry: Dict[str, Callable] = {}
+    # Define registry interactions.
+    #
+    # This is used in large part for conversions.
+    @classmethod
+    def list_node_names(cls)->List[str]:
+        """List """
+        return [file.name for file in cls._registry]
+    @classmethod
+    def list_node_classes(cls)->List['SchemaNode']:
+        return [file.node_type for file in cls._registry]
 
     @classmethod
-    def name(cls) -> str:
-        if not hasattr(cls, "_name"):
-            raise NotImplementedError("Subclass never implemented the class level _name field")
-        return cls._name
+    def list_node_pytypes(cls)->List[Type]:
+        return [file.pytype for file in cls._registry]
 
     @classmethod
-    def pytype(cls) -> Type:
-        if not hasattr(cls, "_pytype"):
-            raise NotImplementedError("Subclass never implemented the class level '_pytype' field")
-        return cls._pytype
+    def register_node(cls,
+                      name: str,
+                      pytype: Type,
+                      transforms: Dict[str, Callable],
+                        node: 'SchemaNode'):
+        cls._registry.append(NodeFile(name, pytype, node))
+
+    @classmethod
+    def get_node_file(cls, key: Any | Type | str)->NodeFile:
+
+        for node_file in cls._registry:
+            if isinstance(key, type) and node_file.pytype is key and node_file.pytype is not None:
+                # Fetch by type
+                return node_file
+            if isinstance(key, str) and node_file.name == key:
+                # Fetch by name
+                return node_file
+            if isinstance(key, node_file.node_type):
+                # Fetch by node
+
+    # Retrieval
+    @classmethod
+    def name(cls):
+        return cls.get_node_file(cls).name
+    @classmethod
+    def pytype(cls):
+        return cls.get_node_file(cls).pytype
+
+
+
 
     @classmethod
     def register_transform(cls, name: str, operand: Callable[['SchemaNode', Any], Generator['SchemaNode', None, None]]):
@@ -60,8 +92,9 @@ class SchemaNode(ABC):
         cls._transform_registry[name] = operand
 
     def __init_subclass__(cls, **kwargs):
+        if "pytype" in kwargs and "name" in kwargs and "transforms" in kwargs:
+            cls.register_node(kwargs["name"], kwargs["pytype"], kwargs["transforms"], cls)
         super().__init_subclass__(**kwargs)
-        cls._transform_registry = {}
 
     @abstractmethod
     def walk(self) -> Generator[Tuple[List['SchemaNode'], 'SchemaNode'], None, None]:

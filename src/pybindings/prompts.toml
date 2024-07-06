@@ -1,0 +1,25 @@
+[prompts.FunctionManual]
+dynamic_keywords = ["name", "user_manual", "docstring", "typehint_syntax"]
+prompt = """
+---- manual: {name} ----
+
+This is a  function manual page for something named '{name}'
+
+---- user manual ----
+
+If it is specified, the user manual is as follows:
+
+{user_manual}
+
+---- docstring ----
+
+The following was found off the function docstring:
+
+{docstring}
+
+---- typehint syntax ----
+
+The following was deduced based on the function typehints:
+
+{typehint_syntax}
+"""

@@ -9,3 +9,7 @@ class ExportException(Exception):
 class TransformException(Exception):
     def __init__(self, msg: str):
         super().__init__(msg)
+
+class NodeException(Exception):
+    def __init__(self, msg: str):
+        super().__init__(msg)
