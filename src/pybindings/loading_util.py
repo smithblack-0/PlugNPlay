@@ -1,8 +1,8 @@
 import itertools
 import typing
-from typing import Any, Union, List, Dict, Generator, Callable
-from src.pybindings.pytrees import PyTreeError, is_schema_leaf
-from src.pybindings.pytrees import FormalSchema, SchemaGroup
+from typing import Any, Union, Generator, Callable
+from src.irnodes import IRNodeError, is_schema_leaf
+from src.irnodes import FormalSchema, SchemaGroup
 
 
 def convert_type_to_schema(type_hint: Any) -> Generator[Any, None, None]:
@@ -39,7 +39,7 @@ def convert_type_to_schema(type_hint: Any) -> Generator[Any, None, None]:
                 yield {key_schema : value_schema}
 
     else:
-        raise PyTreeError(f"Unsupported type hint: {type_hint}")
+        raise IRNodeError(f"Unsupported type hint: {type_hint}")
 
 
 

@@ -1,6 +1,6 @@
 import unittest
 from typing import Any, Union, List, Dict
-from src.pybindings.pytrees import PyTreeError, SchemaGroup, FormalSchema
+from src.irnodes import IRNodeError, SchemaGroup
 from src.pybindings.loading_util import convert_type_to_schema, extract_schemagroup_from_function
 
 SHOW_ERROR_MESSAGES = True
@@ -17,7 +17,7 @@ class TestConvertTypeToSchema(unittest.TestCase):
             if not should_pass:
                 self.fail(f"{validator_func.__name__} did not raise PyTreeError as expected")
             return result
-        except PyTreeError as e:
+        except IRNodeError as e:
             if should_pass:
                 if SHOW_ERROR_MESSAGES:
                     self.fail(f"{validator_func.__name__} raised PyTreeError unexpectedly: {e}")

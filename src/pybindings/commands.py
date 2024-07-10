@@ -2,25 +2,7 @@ from typing import Callable, Tuple, List, Dict
 
 
 
-class FunctionManual:
-    """
-    Container for data related to rendering a manual
 
-    ---- gpt instructions ----
-    where present, type must be satisfied.
-    user_manual may have formatting keys, these must match the keys in user examples
-    typehint s
-
-    """
-    name: str
-    user_manual: str
-    user_examples: Dict[str, "Pytree"]
-    docstring: str
-    typehint_syntax: "Pytree"
-    def __init__(self,
-                 name: str,
-
-                 ):
 
 
 class CommandData:
